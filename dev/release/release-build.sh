@@ -228,8 +228,8 @@ function checkout_code {
     rm -rf $RELEASE_WORK_DIR
     mkdir -p $RELEASE_WORK_DIR
     cd $RELEASE_WORK_DIR
-    git clone https://git-wip-us.apache.org/repos/asf/systemml.git
-    cd systemml
+    git clone https://github.com/asurve/arvind-sysml2.git 
+    cd arvind-sysml2
     git checkout $GIT_REF
     git_hash=`git rev-parse --short HEAD`
     echo "Checked out SystemML git hash $git_hash"
@@ -245,7 +245,7 @@ if [[ "$RELEASE_PREPARE" == "true" ]]; then
     echo "Preparing release $RELEASE_VERSION"
     # Checkout code
     checkout_code
-    cd $RELEASE_WORK_DIR/systemml
+    cd $RELEASE_WORK_DIR/arvind-sysml2
 
     # Build and prepare the release
     $MVN $PUBLISH_PROFILES release:clean release:prepare $DRY_RUN -Darguments="-Dgpg.passphrase=\"$GPG_PASSPHRASE\" -DskipTests" -DreleaseVersion="$RELEASE_VERSION" -DdevelopmentVersion="$DEVELOPMENT_VERSION" -Dtag="$RELEASE_TAG"
@@ -265,13 +265,17 @@ if [[ "$RELEASE_PREPARE" == "true" ]]; then
     echo "RELEASE_STAGING_LOCATION=$RELEASE_STAGING_LOCATION"
     echo "BASE_DIR=$BASE_DIR"
 
-    exit 5
+    # exit 5
 
     # Update dev/release/target/release/systemml/pom.xml  with similar to following contents which is for 0.13.0 RC1
     #   Update <version>0.13.0</version>
     #   Update <tag>v0.13.0-rc1</tag>
+    # Update pom.xml file for maven plugin issue described below so that artifacts get generated with correct version information.
+    sed -i .bak "s|<version>$DEVELOPMENT_VERSION<\/version>|<version>$RELEASE_VERSION<\/version>|" $BASE_DIR/target/release/arvind-sysml2/pom.xml
+    sed -i .bak "s|<tag>HEAD<\/tag>|<tag>$RELEASE_TAG<\/tag>|" $BASE_DIR/target/release/arvind-sysml2/pom.xml
 
-    cd $RELEASE_WORK_DIR/systemml
+
+    cd $RELEASE_WORK_DIR/arvind-sysml2
     ## Rerunning mvn with clean and package goals, as release:prepare changes ordeer for some dependencies like unpack and shade.
     $MVN $PUBLISH_PROFILES clean package $DRY_RUN -Darguments="-Dgpg.passphrase=\"$GPG_PASSPHRASE\" -DskipTests" -DreleaseVersion="$RELEASE_VERSION" -DdevelopmentVersion="$DEVELOPMENT_VERSION" -Dtag="$RELEASE_TAG"
 
@@ -280,9 +284,9 @@ if [[ "$RELEASE_PREPARE" == "true" ]]; then
     if [ -z "$DRY_RUN" ]; then
         svn co $RELEASE_STAGING_LOCATION svn-release-staging
         mkdir -p svn-release-staging/$RELEASE_VERSION-$RELEASE_RC
-        cp $RELEASE_WORK_DIR/systemml/target/systemml-*-bin.* svn-release-staging/$RELEASE_VERSION-$RELEASE_RC/
-        cp $RELEASE_WORK_DIR/systemml/target/systemml-*-src.* svn-release-staging/$RELEASE_VERSION-$RELEASE_RC/
-        cp $RELEASE_WORK_DIR/systemml/target/systemml-*-python.* svn-release-staging/$RELEASE_VERSION-$RELEASE_RC/
+        cp $RELEASE_WORK_DIR/arvind-sysml2/target/systemml-*-bin.* svn-release-staging/$RELEASE_VERSION-$RELEASE_RC/
+        cp $RELEASE_WORK_DIR/arvind-sysml2/target/systemml-*-src.* svn-release-staging/$RELEASE_VERSION-$RELEASE_RC/
+        cp $RELEASE_WORK_DIR/arvind-sysml2/target/systemml-*-python.* svn-release-staging/$RELEASE_VERSION-$RELEASE_RC/
 
         cd svn-release-staging/$RELEASE_VERSION-$RELEASE_RC/
         rm -f *.asc
@@ -309,7 +313,7 @@ if [[ "$RELEASE_PUBLISH" == "true" ]]; then
     echo "Preparing release $RELEASE_VERSION"
     # Checkout code
     checkout_code
-    cd $RELEASE_WORK_DIR/systemml
+    cd $RELEASE_WORK_DIR/arvind-sysml2
 
     #Deploy scala 2.10
     mvn -DaltDeploymentRepository=apache.releases.https::default::https://repository.apache.org/service/local/staging/deploy/maven2 clean package gpg:sign install:install deploy:deploy -DskiptTests -Darguments="-DskipTests -Dgpg.passphrase=\"$GPG_PASSPHRASE\"" -Dgpg.passphrase="$GPG_PASSPHRASE" $PUBLISH_PROFILES
@@ -323,7 +327,7 @@ fi
 if [[ "$RELEASE_SNAPSHOT" == "true" ]]; then
     # Checkout code
     checkout_code
-    cd $RELEASE_WORK_DIR/systemml
+    cd $RELEASE_WORK_DIR/arvind-sysml2
 
     CURRENT_VERSION=$($MVN help:evaluate -Dexpression=project.version \
     | grep -v INFO | grep -v WARNING | grep -v Download)
