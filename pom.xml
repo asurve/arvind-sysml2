@@ -25,7 +25,7 @@
 		<version>18</version>
 	</parent>
 	<groupId>org.apache.systemml</groupId>
-	<version>0.2.0-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<artifactId>systemml</artifactId>
 	<packaging>jar</packaging>
 	<name>SystemML</name>
@@ -41,7 +41,7 @@
 		<connection>scm:git:git@github.com:asurve/arvind-sysml2</connection>
 		<developerConnection>scm:git:https://github.com/asurve/arvind-sysml2</developerConnection>
 		<url>https://github.com/asurve/arvind-sysml2.git</url>
-		<tag>HEAD</tag>
+		<tag>v0.1.0-rc1</tag>
 	</scm>
 	<issueManagement>
 		<system>JIRA</system>
